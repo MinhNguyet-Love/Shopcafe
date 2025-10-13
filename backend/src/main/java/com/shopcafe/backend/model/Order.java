@@ -2,7 +2,6 @@ package com.shopcafe.backend.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-
 import java.time.LocalDate;
 import java.util.List;
 
@@ -14,12 +13,9 @@ public class Order {
     private String tableId;
     private String userId;
     private List<OrderItem> items;
-    private String status;
+    private String status; // ĐANG PHỤC VỤ / ĐÃ THANH TOÁN
     private double totalPrice;
-
-    // ✅ Thêm dòng này để fix lỗi
-    private LocalDate businessDate;
-
+    private LocalDate businessDate = LocalDate.now();
     private String createdAt;
 
     // --- Getters & Setters ---

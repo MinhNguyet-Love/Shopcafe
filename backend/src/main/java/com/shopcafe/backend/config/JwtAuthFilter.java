@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 @Component
@@ -35,39 +36,38 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         String path = request.getRequestURI();
 
-        // ✅ Bỏ qua token cho các route public
-        if (path.startsWith("/api/auth")
-                || path.startsWith("/api/products")
-                || path.startsWith("/api/tables")
-                || path.startsWith("/api/orders")
-                || path.startsWith("/swagger-ui")
-                || path.startsWith("/v3/api-docs")) {
+        // ✅ Bỏ qua các route public
+        if (path.startsWith("/api/auth") ||
+                path.startsWith("/uploads") ||
+                path.startsWith("/swagger-ui") ||
+                path.startsWith("/v3/api-docs")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // ✅ Lấy token từ header
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        String header = request.getHeader("Authorization");
+        if (header == null || !header.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        String jwt = authHeader.substring(7);
-        String email = jwtService.extractEmail(jwt);
+        String token = header.substring(7);
+        String email = jwtService.extractEmail(token);
 
-        // ✅ Kiểm tra token và thiết lập context
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             var user = userRepo.findByEmailIgnoreCase(email).orElse(null);
 
-            if (user != null && jwtService.isValid(jwt, email)) {
-                var authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
+            if (user != null && jwtService.isValid(token, email)) {
+                String role = user.getRole().toUpperCase();
+                if (!role.startsWith("ROLE_")) role = "ROLE_" + role;
+
+                List<SimpleGrantedAuthority> authorities =
+                        Collections.singletonList(new SimpleGrantedAuthority(role));
 
                 UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(
-                                user, null, authorities
-                        );
+                        new UsernamePasswordAuthenticationToken(user, null, authorities);
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }

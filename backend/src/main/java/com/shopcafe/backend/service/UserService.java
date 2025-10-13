@@ -24,19 +24,9 @@ public class UserService {
         this.jwtService = jwtService;
     }
 
-    // ✅ Lấy tất cả user
-    public List<User> all() {
-        return repo.findAll();
-    }
-
-    // ✅ Lấy user theo ID
-    public Optional<User> findById(String id) {
-        return repo.findById(id);
-    }
-
     // ✅ Đăng ký
     public AuthResponse register(RegisterRequest req) {
-        if (repo.findByEmailIgnoreCase(req.getEmail()).isPresent()) {
+        if (repo.findByEmail(req.getEmail()).isPresent()) {
             throw new RuntimeException("Email đã tồn tại!");
         }
 
@@ -44,28 +34,34 @@ public class UserService {
         u.setUsername(req.getUsername());
         u.setEmail(req.getEmail());
         u.setPassword(passwordEncoder.encode(req.getPassword()));
-        u.setRole(req.getRole() != null ? req.getRole() : "USER");
+        u.setRole("USER");
 
         repo.save(u);
 
-        String token = jwtService.generateToken(u.getEmail());
-        return new AuthResponse(token, u.getUsername(), u.getRole());
+        String token = jwtService.generateToken(u.getEmail(), u.getRole());
+        return new AuthResponse(token, u.getRole());
     }
 
     // ✅ Đăng nhập
     public AuthResponse login(LoginRequest req) {
-        Optional<User> userOpt = repo.findByEmailIgnoreCase(req.getEmail());
-        if (userOpt.isEmpty()) {
-            throw new RuntimeException("Sai email hoặc mật khẩu!");
+        User u = repo.findByEmail(req.getEmail())
+                .orElseThrow(() -> new RuntimeException("Email không tồn tại!"));
+
+        if (!passwordEncoder.matches(req.getPassword(), u.getPassword())) {
+            throw new RuntimeException("Sai mật khẩu!");
         }
 
-        User user = userOpt.get();
+        String token = jwtService.generateToken(u.getEmail(), u.getRole());
+        return new AuthResponse(token, u.getRole());
+    }
 
-        if (!passwordEncoder.matches(req.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Sai email hoặc mật khẩu!");
-        }
+    // ✅ Lấy danh sách tất cả user
+    public List<User> getAll() {
+        return repo.findAll();
+    }
 
-        String token = jwtService.generateToken(user.getEmail());
-        return new AuthResponse(token, user.getUsername(), user.getRole());
+    // ✅ Tìm user theo ID
+    public Optional<User> findById(String id) {
+        return repo.findById(id);
     }
 }

@@ -6,15 +6,7 @@ public class OrderItem {
     private int quantity;
     private double unitPrice;
 
-    public OrderItem() {}
-
-    public OrderItem(String productId, String productName, int quantity, double unitPrice) {
-        this.productId = productId;
-        this.productName = productName;
-        this.quantity = quantity;
-        this.unitPrice = unitPrice;
-    }
-
+    // --- Getters & Setters ---
     public String getProductId() { return productId; }
     public void setProductId(String productId) { this.productId = productId; }
 

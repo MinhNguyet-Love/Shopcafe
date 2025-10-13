@@ -18,13 +18,16 @@ public class OrderController {
         this.service = service;
     }
 
-    // ✅ GET all orders
     @GetMapping
     public ResponseEntity<List<Order>> all() {
         return ResponseEntity.ok(service.all());
     }
 
-    // ✅ GET order by id
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<Order>> getByUser(@PathVariable String userId) {
+        return ResponseEntity.ok(service.findByUser(userId));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Order> getById(@PathVariable String id) {
         Optional<Order> order = service.findById(id);
@@ -32,27 +35,21 @@ public class OrderController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // ✅ POST create order
     @PostMapping
     public ResponseEntity<Order> create(@RequestBody Order o) {
-        return ResponseEntity.ok(service.create(o, "admin"));
+        return ResponseEntity.ok(service.create(o));
     }
 
-    // ✅ PUT update order
-    @PutMapping("/{id}")
-    public ResponseEntity<Order> update(@PathVariable String id, @RequestBody Order updated) {
-        Optional<Order> order = service.update(id, updated);
+    @PutMapping("/{id}/status")
+    public ResponseEntity<Order> updateStatus(@PathVariable String id, @RequestParam String status) {
+        Optional<Order> order = service.updateStatus(id, status);
         return order.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // ✅ DELETE order
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable String id) {
-        if (service.delete(id)) {
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        if (service.delete(id)) return ResponseEntity.noContent().build();
+        return ResponseEntity.notFound().build();
     }
 }
