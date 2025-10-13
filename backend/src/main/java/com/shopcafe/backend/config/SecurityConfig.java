@@ -138,6 +138,9 @@ public class SecurityConfig {
                         // 🟢 Public GET
                         .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/tables/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/orders/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/user/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/").permitAll()
 
                         // 🔒 Admin only
                         .requestMatchers(HttpMethod.POST, "/api/products/**").hasRole("ADMIN")
