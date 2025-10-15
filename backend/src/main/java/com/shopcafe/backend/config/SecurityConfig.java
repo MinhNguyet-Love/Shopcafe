@@ -141,6 +141,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/orders/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/user/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/").permitAll()
+//                        .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
 
                         // 🔒 Admin only
                         .requestMatchers(HttpMethod.POST, "/api/products/**").hasRole("ADMIN")

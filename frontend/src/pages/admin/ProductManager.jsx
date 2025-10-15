@@ -226,7 +226,9 @@ export default function ProductManager() {
     const [form, setForm] = useState({ name: "", price: "", category: "", description: "" });
     const [file, setFile] = useState(null);
     const [editId, setEditId] = useState(null);
+    const [showModal, setShowModal] = useState(false); // ✅ popup form
 
+    // 🟤 Lấy danh sách sản phẩm
     const fetchProducts = async () => {
         try {
             const res = await api.get("/products");
@@ -240,6 +242,7 @@ export default function ProductManager() {
         fetchProducts();
     }, []);
 
+    // 🟤 Submit form
     const handleSubmit = async (e) => {
         e.preventDefault();
         const token = localStorage.getItem("token");
@@ -267,28 +270,29 @@ export default function ProductManager() {
             setForm({ name: "", price: "", category: "", description: "" });
             setFile(null);
             setEditId(null);
+            setShowModal(false);
             fetchProducts();
         } catch {
             alert("❌ Không thể lưu món!");
         }
     };
 
+    // 🟤 Sửa / Xóa
     const handleEdit = (p) => {
         setForm({ name: p.name, price: p.price, category: p.category, description: p.description });
         setEditId(p.id);
+        setShowModal(true);
     };
 
     const handleDelete = async (id) => {
         const token = localStorage.getItem("token");
         if (!token) return alert("⚠️ Cần đăng nhập ADMIN!");
         if (!window.confirm("Xóa món này?")) return;
-
-        await api.delete(`/products/${id}`, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
+        await api.delete(`/products/${id}`, { headers: { Authorization: `Bearer ${token}` } });
         fetchProducts();
     };
 
+    // 🟤 Style
     const styles = {
         page: {
             backgroundColor: "#fffaf5",
@@ -297,29 +301,21 @@ export default function ProductManager() {
             fontFamily: "'Poppins', sans-serif",
             color: "#3e2723",
         },
-        title: { fontSize: 24, fontWeight: 700, color: "#4e342e", marginBottom: 20 },
-        form: {
-            backgroundColor: "#fdf3e7",
-            borderRadius: 12,
-            border: "1px solid #e0c3a3",
-            padding: 20,
-            boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
-            marginBottom: 30,
+        titleRow: {
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: 20,
         },
-        input: {
-            width: "100%",
-            padding: 8,
-            border: "1px solid #d7ccc8",
-            borderRadius: 6,
-            marginBottom: 12,
-        },
-        button: {
-            backgroundColor: "#8d6e63",
+        title: { fontSize: 24, fontWeight: 700, color: "#4e342e", display: "flex", alignItems: "center", gap: 10 },
+        addBtn: {
+            backgroundColor: "#6d4c41",
             color: "#fff",
             border: "none",
-            borderRadius: 6,
-            padding: "8px 14px",
+            borderRadius: 8,
+            padding: "8px 16px",
             cursor: "pointer",
+            fontWeight: 600,
         },
         table: {
             width: "100%",
@@ -328,30 +324,90 @@ export default function ProductManager() {
             borderRadius: 8,
             overflow: "hidden",
         },
-        th: { background: "#d7ccc8", padding: 10, border: "1px solid #bbb" },
+        th: {
+            background: "#d7ccc8",
+            padding: 10,
+            border: "1px solid #bbb",
+            fontWeight: 600,
+        },
         td: { padding: 8, border: "1px solid #ddd", textAlign: "center" },
+        overlay: {
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            background: "rgba(0,0,0,0.4)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 9999,
+        },
+        modal: {
+            backgroundColor: "#fff",
+            borderRadius: 12,
+            padding: "24px 28px",
+            width: "400px",
+            maxWidth: "90%",
+            boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
+            position: "relative",
+            animation: "fadeIn 0.3s ease",
+        },
+        closeBtn: {
+            position: "absolute",
+            top: 10,
+            right: 14,
+            fontSize: 20,
+            fontWeight: "bold",
+            border: "none",
+            background: "none",
+            cursor: "pointer",
+            color: "#6d4c41",
+        },
+        modalTitle: {
+            textAlign: "center",
+            fontWeight: 700,
+            color: "#4e342e",
+            marginBottom: 20,
+            fontSize: 20,
+        },
+        input: {
+            width: "100%",
+            padding: 8,
+            border: "1px solid #d7ccc8",
+            borderRadius: 6,
+            marginBottom: 12,
+            fontFamily: "inherit",
+        },
+        button: {
+            backgroundColor: "#8d6e63",
+            color: "#fff",
+            border: "none",
+            borderRadius: 6,
+            padding: "8px 14px",
+            cursor: "pointer",
+            width: "100%",
+            fontWeight: 600,
+        },
     };
 
     return (
         <div style={styles.page}>
-            <h2 style={styles.title}>🍰 Quản lý sản phẩm</h2>
-
-            <form style={styles.form} onSubmit={handleSubmit}>
-                <input style={styles.input} placeholder="Tên món" value={form.name}
-                       onChange={(e) => setForm({ ...form, name: e.target.value })} required />
-                <input style={styles.input} type="number" placeholder="Giá (VND)" value={form.price}
-                       onChange={(e) => setForm({ ...form, price: e.target.value })} required />
-                <input style={styles.input} placeholder="Loại" value={form.category}
-                       onChange={(e) => setForm({ ...form, category: e.target.value })} />
-                <textarea style={styles.input} placeholder="Mô tả" rows="3"
-                          value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
-                <input type="file" accept="image/*" onChange={(e) => setFile(e.target.files[0])} />
-                <br />
-                <button style={styles.button} type="submit">
-                    {editId ? "💾 Cập nhật" : "➕ Thêm mới"}
+            <div style={styles.titleRow}>
+                <h2 style={styles.title}>🍰 Quản lý sản phẩm</h2>
+                <button
+                    style={styles.addBtn}
+                    onClick={() => {
+                        setEditId(null);
+                        setForm({ name: "", price: "", category: "", description: "" });
+                        setShowModal(true);
+                    }}
+                >
+                    ➕ Thêm món
                 </button>
-            </form>
+            </div>
 
+            {/* Bảng sản phẩm */}
             <table style={styles.table}>
                 <thead>
                 <tr>
@@ -367,21 +423,135 @@ export default function ProductManager() {
                 {products.map((p) => (
                     <tr key={p.id}>
                         <td style={styles.td}>
-                            <img src={p.imageUrl ? `http://localhost:8080${p.imageUrl}` : "https://via.placeholder.com/50"}
-                                 alt={p.name} width="50" height="50" style={{ borderRadius: 6 }} />
+                            <img
+                                src={
+                                    p.imageUrl
+                                        ? `http://localhost:8080${p.imageUrl}`
+                                        : "https://via.placeholder.com/50"
+                                }
+                                alt={p.name}
+                                width="50"
+                                height="50"
+                                style={{ borderRadius: 6 }}
+                            />
                         </td>
                         <td style={styles.td}>{p.name}</td>
                         <td style={styles.td}>{p.price?.toLocaleString()} đ</td>
                         <td style={styles.td}>{p.category}</td>
                         <td style={styles.td}>{p.description}</td>
+
+                        {/* ✅ Hành động đẹp */}
                         <td style={styles.td}>
-                            <button style={{ ...styles.button, marginRight: 6 }} onClick={() => handleEdit(p)}>✏️</button>
-                            <button style={{ ...styles.button, background: "#a1887f" }} onClick={() => handleDelete(p.id)}>🗑️</button>
+                            <div
+                                style={{
+                                    display: "flex",
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                    gap: "8px",
+                                }}
+                            >
+                                <button
+                                    title="Sửa món"
+                                    style={{
+                                        background: "#ffe0b2",
+                                        border: "none",
+                                        borderRadius: "6px",
+                                        padding: "6px 8px",
+                                        cursor: "pointer",
+                                        fontSize: "16px",
+                                        transition: "all 0.2s ease",
+                                    }}
+                                    onMouseOver={(e) =>
+                                        (e.currentTarget.style.background = "#ffcc80")
+                                    }
+                                    onMouseOut={(e) =>
+                                        (e.currentTarget.style.background = "#ffe0b2")
+                                    }
+                                    onClick={() => handleEdit(p)}
+                                >
+                                    ✏️
+                                </button>
+
+                                <button
+                                    title="Xóa món"
+                                    style={{
+                                        background: "#ef9a9a",
+                                        border: "none",
+                                        borderRadius: "6px",
+                                        padding: "6px 8px",
+                                        cursor: "pointer",
+                                        fontSize: "16px",
+                                        transition: "all 0.2s ease",
+                                    }}
+                                    onMouseOver={(e) =>
+                                        (e.currentTarget.style.background = "#e57373")
+                                    }
+                                    onMouseOut={(e) =>
+                                        (e.currentTarget.style.background = "#ef9a9a")
+                                    }
+                                    onClick={() => handleDelete(p.id)}
+                                >
+                                    🗑️
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 ))}
                 </tbody>
             </table>
+
+            {/* ✅ Popup modal */}
+            {showModal && (
+                <div style={styles.overlay}>
+                    <div style={styles.modal}>
+                        <button style={styles.closeBtn} onClick={() => setShowModal(false)}>
+                            ×
+                        </button>
+                        <h3 style={styles.modalTitle}>
+                            {editId ? "✏️ Cập nhật món" : "➕ Thêm món mới"}
+                        </h3>
+                        <form onSubmit={handleSubmit}>
+                            <input
+                                style={styles.input}
+                                placeholder="Tên món"
+                                value={form.name}
+                                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                                required
+                            />
+                            <input
+                                style={styles.input}
+                                type="number"
+                                placeholder="Giá (VND)"
+                                value={form.price}
+                                onChange={(e) => setForm({ ...form, price: e.target.value })}
+                                required
+                            />
+                            <input
+                                style={styles.input}
+                                placeholder="Loại"
+                                value={form.category}
+                                onChange={(e) => setForm({ ...form, category: e.target.value })}
+                            />
+                            <textarea
+                                style={styles.input}
+                                placeholder="Mô tả"
+                                rows="3"
+                                value={form.description}
+                                onChange={(e) => setForm({ ...form, description: e.target.value })}
+                            />
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => setFile(e.target.files[0])}
+                            />
+                            <br />
+                            <button type="submit" style={{ ...styles.button, marginTop: 12 }}>
+                                {editId ? "💾 Lưu thay đổi" : "✅ Thêm món"}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

@@ -154,3 +154,142 @@ body {
 a {
     color: #a05f2f;
 }
+/* ======= Booking Page ======= */
+.booking-page {
+    background: #fdf7f3;
+    min-height: 100vh;
+    padding: 30px 60px;
+}
+
+.booking-container {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+}
+
+.menu-title {
+    color: #4e342e;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.section-title {
+    color: #6d4c41;
+    margin-top: 20px;
+}
+
+/* ==== MENU GRID ==== */
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 18px;
+    margin-top: 12px;
+}
+
+.menu-card {
+    background: #fff;
+    border: 1px solid #e0c3a3;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06);
+    text-align: center;
+    padding: 10px;
+    transition: all 0.25s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.menu-card:hover {
+    transform: translateY(-3px);
+}
+.menu-img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+.menu-info {
+    margin-top: 10px;
+}
+.menu-info h4 {
+    color: #4e342e;
+    font-size: 15px;
+    margin: 0;
+}
+.menu-price {
+    color: #6d4c41;
+    font-weight: 500;
+    margin: 4px 0 10px;
+}
+
+/* ==== CART ==== */
+.cart-card {
+    background: #fff;
+    border: 1px solid #e0c3a3;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 4px 16px rgba(50, 30, 10, 0.08);
+    height: fit-content;
+    position: sticky;
+    top: 20px;
+}
+
+.cart-items {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 10px;
+}
+
+.cart-item {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    border-bottom: 1px solid #f1e0d2;
+    padding-bottom: 8px;
+}
+.cart-img {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+.cart-info {
+    flex: 1;
+}
+.cart-info p {
+    font-size: 14px;
+    color: #6d4c41;
+    margin: 3px 0;
+}
+.cart-buttons {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.cart-buttons button {
+    background: #6d4c41;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    width: 26px;
+    height: 26px;
+    cursor: pointer;
+    font-size: 16px;
+}
+.cart-buttons span {
+    min-width: 20px;
+    text-align: center;
+}
+.delete-btn {
+    background: #ffeded !important;
+    color: #d33;
+}
+.cart-total {
+    margin-top: 12px;
+    text-align: right;
+    color: #3e2723;
+    font-weight: 600;
+}
+.full {
+    width: 100%;
+}

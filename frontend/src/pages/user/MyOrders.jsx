@@ -59,13 +59,13 @@ export default function MyOrders() {
 
     const styles = {
         page: {
-            backgroundColor: "#fff",
+            backgroundColor: "#fffaf5",
             minHeight: "100vh",
             padding: "40px 60px",
             fontFamily: "'Poppins', sans-serif",
         },
         title: {
-            color: "#5d4037",
+            color: "#4e342e",
             textAlign: "center",
             fontSize: 26,
             marginBottom: 24,
@@ -73,16 +73,16 @@ export default function MyOrders() {
         },
         grid: {
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
             gap: 24,
         },
         card: {
             backgroundColor: "#fdf6f2",
             border: "1px solid #e0c3a3",
             borderRadius: 12,
-            padding: 16,
+            padding: 18,
             boxShadow: "0 3px 10px rgba(0,0,0,0.1)",
-            transition: "transform 0.2s ease",
+            transition: "transform 0.2s ease, box-shadow 0.2s ease",
         },
         cardHover: `
       .order-card:hover {
@@ -122,11 +122,14 @@ export default function MyOrders() {
                     {orders.map((o) => (
                         <div key={o.id} className="order-card" style={styles.card}>
                             <p>
-                                <span style={styles.label}>Bàn:</span> {o.tableId}
+                                <span style={styles.label}>Bàn:</span>{" "}
+                                {o.tableName || "Không rõ"} {/* ✅ dùng tableName */}
                             </p>
                             <p>
                                 <span style={styles.label}>Ngày:</span>{" "}
-                                {new Date(o.businessDate).toLocaleDateString("vi-VN")}
+                                {o.businessDate
+                                    ? new Date(o.businessDate).toLocaleDateString("vi-VN")
+                                    : "Không có"}
                             </p>
                             <p>
                                 <span style={styles.label}>Tổng tiền:</span>{" "}

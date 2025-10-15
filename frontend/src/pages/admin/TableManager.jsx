@@ -152,6 +152,7 @@ export default function TableManager() {
     const [list, setList] = useState([]);
     const [form, setForm] = useState({ name: "", capacity: "", status: "TRỐNG" });
     const [editingId, setEditingId] = useState(null);
+    const [showModal, setShowModal] = useState(false); // ✅ popup form
 
     const load = async () => {
         try {
@@ -166,9 +167,11 @@ export default function TableManager() {
         load();
     }, []);
 
-    const save = async () => {
+    // 🟤 Thêm hoặc cập nhật bàn
+    const save = async (e) => {
+        e.preventDefault();
         const token = localStorage.getItem("token");
-        if (!token) return alert("⚠️ Vui lòng đăng nhập với quyền admin!");
+        if (!token) return alert("⚠️ Cần đăng nhập admin!");
         if (!form.name) return alert("⚠️ Nhập tên bàn!");
 
         try {
@@ -176,7 +179,7 @@ export default function TableManager() {
                 await api.put(`/tables/${editingId}`, form, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
-                alert("✅ Cập nhật bàn thành công!");
+                alert("💾 Cập nhật bàn thành công!");
             } else {
                 await api.post("/tables", form, {
                     headers: { Authorization: `Bearer ${token}` },
@@ -185,6 +188,7 @@ export default function TableManager() {
             }
             setForm({ name: "", capacity: "", status: "TRỐNG" });
             setEditingId(null);
+            setShowModal(false);
             load();
         } catch (err) {
             console.error("❌ Lỗi khi lưu bàn:", err);
@@ -192,11 +196,14 @@ export default function TableManager() {
         }
     };
 
+    // 🟤 Nhấn nút sửa
     const edit = (t) => {
         setForm(t);
         setEditingId(t.id);
+        setShowModal(true);
     };
 
+    // 🟤 Xóa bàn
     const remove = async (id) => {
         const token = localStorage.getItem("token");
         if (!token) return alert("⚠️ Đăng nhập quyền admin!");
@@ -213,189 +220,269 @@ export default function TableManager() {
         }
     };
 
-    return (
-        <div
-            style={{
-                backgroundColor: "#fffaf5",
-                minHeight: "100vh",
-                padding: "30px 60px",
-                fontFamily: "'Poppins', sans-serif",
-                color: "#3e2723",
-            }}
-        >
-            <h2 style={{ fontSize: 24, marginBottom: 20 }}>🪑 Quản lý bàn</h2>
+    // 🟤 Đổi trạng thái trực tiếp
+    const cycleStatus = async (t) => {
+        const token = localStorage.getItem("token");
+        if (!token) return alert("⚠️ Cần đăng nhập admin!");
 
-            <div
-                style={{
-                    backgroundColor: "#f8ede3",
-                    padding: "16px",
-                    borderRadius: 10,
-                    marginBottom: 25,
-                    boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
-                }}
-            >
-                <div
-                    style={{
-                        display: "grid",
-                        gridTemplateColumns: "2fr 1fr 1fr auto",
-                        gap: 10,
-                        alignItems: "center",
+        const nextStatus =
+            t.status === "TRỐNG"
+                ? "CÓ KHÁCH"
+                : t.status === "CÓ KHÁCH"
+                    ? "ĐÃ THANH TOÁN"
+                    : "TRỐNG";
+
+        try {
+            await api.put(
+                `/tables/${t.id}`,
+                { ...t, status: nextStatus },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            load();
+        } catch (err) {
+            console.error("❌ Lỗi đổi trạng thái:", err);
+        }
+    };
+
+    // 🎨 Style
+    const styles = {
+        page: {
+            backgroundColor: "#fffaf5",
+            minHeight: "100vh",
+            padding: "40px 60px",
+            fontFamily: "'Poppins', sans-serif",
+            color: "#3e2723",
+        },
+        titleRow: {
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: 20,
+        },
+        title: { fontSize: 24, fontWeight: 700, color: "#4e342e" },
+        addBtn: {
+            backgroundColor: "#6d4c41",
+            color: "#fff",
+            border: "none",
+            borderRadius: 8,
+            padding: "8px 16px",
+            cursor: "pointer",
+            fontWeight: 600,
+        },
+        table: {
+            width: "100%",
+            borderCollapse: "collapse",
+            backgroundColor: "#fff",
+            borderRadius: 10,
+            overflow: "hidden",
+            boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+        },
+        th: {
+            background: "#d7ccc8",
+            padding: 10,
+            borderBottom: "2px solid #a1887f",
+            textAlign: "left",
+            fontWeight: 600,
+        },
+        td: { padding: 10, color: "#4e342e", fontSize: 14 },
+        statusBtn: (status) => ({
+            backgroundColor:
+                status === "TRỐNG"
+                    ? "#a5d6a7"
+                    : status === "CÓ KHÁCH"
+                        ? "#ffe082"
+                        : "#bcaaa4",
+            padding: "6px 10px",
+            borderRadius: 6,
+            fontWeight: 600,
+            fontSize: 13,
+            border: "none",
+            cursor: "pointer",
+            transition: "0.2s",
+        }),
+        overlay: {
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            background: "rgba(0,0,0,0.4)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 9999,
+        },
+        modal: {
+            backgroundColor: "#fff",
+            borderRadius: 12,
+            padding: "24px 28px",
+            width: "400px",
+            maxWidth: "90%",
+            boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
+            position: "relative",
+        },
+        closeBtn: {
+            position: "absolute",
+            top: 10,
+            right: 14,
+            fontSize: 20,
+            fontWeight: "bold",
+            border: "none",
+            background: "none",
+            cursor: "pointer",
+            color: "#6d4c41",
+        },
+        input: {
+            width: "100%",
+            padding: 8,
+            border: "1px solid #d7ccc8",
+            borderRadius: 6,
+            marginBottom: 12,
+            fontFamily: "inherit",
+        },
+        button: {
+            backgroundColor: "#8d6e63",
+            color: "#fff",
+            border: "none",
+            borderRadius: 6,
+            padding: "8px 14px",
+            cursor: "pointer",
+            width: "100%",
+            fontWeight: 600,
+        },
+    };
+
+    return (
+        <div style={styles.page}>
+            <div style={styles.titleRow}>
+                <h2 style={styles.title}>🪑 Quản lý bàn</h2>
+                <button
+                    style={styles.addBtn}
+                    onClick={() => {
+                        setEditingId(null);
+                        setForm({ name: "", capacity: "", status: "TRỐNG" });
+                        setShowModal(true);
                     }}
                 >
-                    <input
-                        placeholder="Tên bàn"
-                        value={form.name}
-                        onChange={(e) => setForm({ ...form, name: e.target.value })}
-                        style={{
-                            padding: "8px 10px",
-                            border: "1px solid #ccc",
-                            borderRadius: 8,
-                            fontSize: 14,
-                        }}
-                    />
-                    <input
-                        type="number"
-                        placeholder="Sức chứa"
-                        value={form.capacity}
-                        onChange={(e) =>
-                            setForm({ ...form, capacity: Number(e.target.value) })
-                        }
-                        style={{
-                            padding: "8px 10px",
-                            border: "1px solid #ccc",
-                            borderRadius: 8,
-                            fontSize: 14,
-                        }}
-                    />
-                    <select
-                        value={form.status}
-                        onChange={(e) => setForm({ ...form, status: e.target.value })}
-                        style={{
-                            padding: "8px 10px",
-                            border: "1px solid #ccc",
-                            borderRadius: 8,
-                            fontSize: 14,
-                        }}
-                    >
-                        <option value="TRỐNG">TRỐNG</option>
-                        <option value="CÓ KHÁCH">CÓ KHÁCH</option>
-                        <option value="ĐÃ THANH TOÁN">ĐÃ THANH TOÁN</option>
-                    </select>
-
-                    <button
-                        onClick={save}
-                        style={{
-                            backgroundColor: "#6d4c41",
-                            color: "white",
-                            border: "none",
-                            borderRadius: 8,
-                            padding: "8px 16px",
-                            fontSize: 14,
-                            cursor: "pointer",
-                        }}
-                    >
-                        {editingId ? "💾 Cập nhật" : "➕ Thêm mới"}
-                    </button>
-                </div>
+                    ➕ Thêm bàn
+                </button>
             </div>
 
-            <table
-                style={{
-                    width: "100%",
-                    borderCollapse: "collapse",
-                    backgroundColor: "#fff",
-                    borderRadius: 10,
-                    overflow: "hidden",
-                    boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
-                }}
-            >
-                <thead style={{ background: "#d7ccc8" }}>
+            <table style={styles.table}>
+                <thead>
                 <tr>
-                    <th style={thStyle}>Tên bàn</th>
-                    <th style={thStyle}>Sức chứa</th>
-                    <th style={thStyle}>Trạng thái</th>
-                    <th style={thStyle}>Hành động</th>
+                    <th style={styles.th}>Tên bàn</th>
+                    <th style={styles.th}>Sức chứa</th>
+                    <th style={styles.th}>Trạng thái</th>
+                    <th style={styles.th}>Hành động</th>
                 </tr>
                 </thead>
                 <tbody>
                 {list.map((t) => (
                     <tr key={t.id} style={{ borderBottom: "1px solid #eee" }}>
-                        <td style={tdStyle}>{t.name}</td>
-                        <td style={tdStyle}>{t.capacity}</td>
-                        <td style={tdStyle}>
-                <span
-                    style={{
-                        backgroundColor:
-                            t.status === "TRỐNG"
-                                ? "#a5d6a7"
-                                : t.status === "CÓ KHÁCH"
-                                    ? "#ffe082"
-                                    : "#bcaaa4",
-                        padding: "4px 8px",
-                        borderRadius: 6,
-                        fontWeight: 600,
-                        fontSize: 13,
-                    }}
-                >
-                  {t.status}
-                </span>
+                        <td style={styles.td}>{t.name}</td>
+                        <td style={styles.td}>{t.capacity}</td>
+                        <td style={styles.td}>
+                            <button
+                                style={styles.statusBtn(t.status)}
+                                onClick={() => cycleStatus(t)}
+                            >
+                                {t.status}
+                            </button>
                         </td>
-                        <td style={tdStyle}>
-                            <button
-                                onClick={() => edit(t)}
+                        <td style={styles.td}>
+                            <div
                                 style={{
-                                    background: "#4e342e",
-                                    color: "white",
-                                    border: "none",
-                                    borderRadius: 6,
-                                    padding: "4px 10px",
-                                    marginRight: 6,
-                                    cursor: "pointer",
+                                    display: "flex",
+                                    gap: "8px",
+                                    justifyContent: "center",
                                 }}
                             >
-                                ✏️
-                            </button>
-                            <button
-                                onClick={() => remove(t.id)}
-                                style={{
-                                    background: "#b71c1c",
-                                    color: "white",
-                                    border: "none",
-                                    borderRadius: 6,
-                                    padding: "4px 10px",
-                                    cursor: "pointer",
-                                }}
-                            >
-                                🗑️
-                            </button>
+                                <button
+                                    title="Sửa bàn"
+                                    style={{
+                                        background: "#ffe0b2",
+                                        border: "none",
+                                        borderRadius: 6,
+                                        padding: "6px 8px",
+                                        cursor: "pointer",
+                                    }}
+                                    onClick={() => edit(t)}
+                                >
+                                    ✏️
+                                </button>
+                                <button
+                                    title="Xóa bàn"
+                                    style={{
+                                        background: "#ef9a9a",
+                                        border: "none",
+                                        borderRadius: 6,
+                                        padding: "6px 8px",
+                                        cursor: "pointer",
+                                    }}
+                                    onClick={() => remove(t.id)}
+                                >
+                                    🗑️
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 ))}
 
                 {list.length === 0 && (
                     <tr>
-                        <td style={tdStyle} colSpan="4">
+                        <td style={styles.td} colSpan="4" align="center">
                             Chưa có bàn nào
                         </td>
                     </tr>
                 )}
                 </tbody>
             </table>
+
+            {/* ✅ Popup thêm/sửa bàn */}
+            {showModal && (
+                <div style={styles.overlay}>
+                    <div style={styles.modal}>
+                        <button style={styles.closeBtn} onClick={() => setShowModal(false)}>
+                            ×
+                        </button>
+                        <h3 style={{ textAlign: "center", marginBottom: 20 }}>
+                            {editingId ? "✏️ Cập nhật bàn" : "➕ Thêm bàn mới"}
+                        </h3>
+                        <form onSubmit={save}>
+                            <input
+                                style={styles.input}
+                                placeholder="Tên bàn"
+                                value={form.name}
+                                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                                required
+                            />
+                            <input
+                                style={styles.input}
+                                type="number"
+                                placeholder="Sức chứa"
+                                value={form.capacity}
+                                onChange={(e) =>
+                                    setForm({ ...form, capacity: Number(e.target.value) })
+                                }
+                                required
+                            />
+                            <select
+                                style={styles.input}
+                                value={form.status}
+                                onChange={(e) => setForm({ ...form, status: e.target.value })}
+                            >
+                                <option value="TRỐNG">TRỐNG</option>
+                                <option value="CÓ KHÁCH">CÓ KHÁCH</option>
+                                <option value="ĐÃ THANH TOÁN">ĐÃ THANH TOÁN</option>
+                            </select>
+                            <button type="submit" style={styles.button}>
+                                {editingId ? "💾 Lưu thay đổi" : "✅ Thêm bàn"}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
-
-const thStyle = {
-    padding: "10px",
-    borderBottom: "2px solid #a1887f",
-    textAlign: "left",
-    fontWeight: 600,
-    color: "#3e2723",
-};
-
-const tdStyle = {
-    padding: "10px",
-    textAlign: "left",
-    color: "#4e342e",
-    fontSize: 14,
-};
