@@ -90,7 +90,7 @@ export default function Home() {
         grid: {
             display: "grid",
             gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
-            gap: 40, // ✅ tăng khoảng cách giữa các bàn
+            gap: 50, // ✅ tăng khoảng cách giữa các bàn
             justifyItems: "center",
         },
         card: {
