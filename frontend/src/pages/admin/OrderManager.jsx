@@ -1248,40 +1248,190 @@ export default function OrderManager() {
                 </div>
             )}
 
+            {/*/!* ===== MODAL SỬA ===== *!/*/}
+            {/*{showEditModal && editingOrder && (*/}
+            {/*    <div style={s.overlay}>*/}
+            {/*        <div style={s.modal}>*/}
+            {/*            <button onClick={() => setShowEditModal(false)} style={{ position: "absolute", right: 12, top: 8, background: "none", border: "none", fontSize: 20 }}>×</button>*/}
+            {/*            <h3>✏️ Sửa đơn — {getTableName(editingOrder.tableId)}</h3>*/}
+
+            {/*            <table style={{ width: "100%", marginBottom: 10 }}>*/}
+            {/*                <thead style={{ background: "#f1e3d6" }}>*/}
+            {/*                <tr><th>Món</th><th>SL</th><th>Đơn giá</th><th>Thành tiền</th></tr>*/}
+            {/*                </thead>*/}
+            {/*                <tbody>*/}
+            {/*                {editItems.map((it, i) => (*/}
+            {/*                    <tr key={i}>*/}
+            {/*                        <td style={s.td}>{it.productName}</td>*/}
+            {/*                        <td style={s.td}>*/}
+            {/*                            <input type="number" min="1" value={it.quantity} onChange={(e) => updateEditItem(i, "quantity", e.target.value)} style={{ width: 60 }} />*/}
+            {/*                        </td>*/}
+            {/*                        <td style={s.td}>*/}
+            {/*                            <input type="number" value={it.unitPrice} onChange={(e) => updateEditItem(i, "unitPrice", e.target.value)} style={{ width: 100 }} />*/}
+            {/*                        </td>*/}
+            {/*                        <td style={s.td}>{(it.quantity * it.unitPrice).toLocaleString()} đ</td>*/}
+            {/*                    </tr>*/}
+            {/*                ))}*/}
+            {/*                </tbody>*/}
+            {/*            </table>*/}
+
+            {/*            <p style={{ textAlign: "right", fontWeight: 700 }}>Tổng: {calcTotal(editItems).toLocaleString()} đ</p>*/}
+            {/*            <div style={{ textAlign: "right" }}>*/}
+            {/*                <button style={s.btn("#8d6e63")} onClick={saveEditOrder}>💾 Lưu thay đổi</button>*/}
+            {/*            </div>*/}
+            {/*        </div>*/}
+            {/*    </div>*/}
+            {/*)}*/}
+
             {/* ===== MODAL SỬA ===== */}
             {showEditModal && editingOrder && (
                 <div style={s.overlay}>
                     <div style={s.modal}>
-                        <button onClick={() => setShowEditModal(false)} style={{ position: "absolute", right: 12, top: 8, background: "none", border: "none", fontSize: 20 }}>×</button>
+                        <button
+                            onClick={() => setShowEditModal(false)}
+                            style={{
+                                position: "absolute",
+                                right: 12,
+                                top: 8,
+                                background: "none",
+                                border: "none",
+                                fontSize: 20,
+                            }}
+                        >
+                            ×
+                        </button>
+
                         <h3>✏️ Sửa đơn — {getTableName(editingOrder.tableId)}</h3>
 
+                        {/* 🧩 Bảng món hiện tại */}
                         <table style={{ width: "100%", marginBottom: 10 }}>
                             <thead style={{ background: "#f1e3d6" }}>
-                            <tr><th>Món</th><th>SL</th><th>Đơn giá</th><th>Thành tiền</th></tr>
+                            <tr>
+                                <th>Món</th>
+                                <th>SL</th>
+                                <th>Đơn giá</th>
+                                <th>Thành tiền</th>
+                                <th></th>
+                            </tr>
                             </thead>
                             <tbody>
                             {editItems.map((it, i) => (
                                 <tr key={i}>
                                     <td style={s.td}>{it.productName}</td>
                                     <td style={s.td}>
-                                        <input type="number" min="1" value={it.quantity} onChange={(e) => updateEditItem(i, "quantity", e.target.value)} style={{ width: 60 }} />
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            value={it.quantity}
+                                            onChange={(e) => updateEditItem(i, "quantity", e.target.value)}
+                                            style={{ width: 60 }}
+                                        />
                                     </td>
                                     <td style={s.td}>
-                                        <input type="number" value={it.unitPrice} onChange={(e) => updateEditItem(i, "unitPrice", e.target.value)} style={{ width: 100 }} />
+                                        <input
+                                            type="number"
+                                            value={it.unitPrice}
+                                            onChange={(e) => updateEditItem(i, "unitPrice", e.target.value)}
+                                            style={{ width: 100 }}
+                                        />
                                     </td>
-                                    <td style={s.td}>{(it.quantity * it.unitPrice).toLocaleString()} đ</td>
+                                    <td style={s.td}>
+                                        {(it.quantity * it.unitPrice).toLocaleString()} đ
+                                    </td>
+                                    <td style={s.td}>
+                                        <button
+                                            onClick={() => removeEditItem(i)}
+                                            style={s.btn("#b71c1c")}
+                                        >
+                                            Xóa
+                                        </button>
+                                    </td>
                                 </tr>
                             ))}
                             </tbody>
                         </table>
 
-                        <p style={{ textAlign: "right", fontWeight: 700 }}>Tổng: {calcTotal(editItems).toLocaleString()} đ</p>
+                        {/* ➕ Thêm món mới vào đơn */}
+                        <h4>➕ Thêm món mới</h4>
+                        <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+                            <select
+                                value={editTempItem.productId}
+                                onChange={(e) => {
+                                    const p = products.find(
+                                        (x) => x.id === e.target.value || x._id === e.target.value
+                                    );
+                                    setEditTempItem({
+                                        ...editTempItem,
+                                        productId: e.target.value,
+                                        unitPrice: p ? p.price : 0,
+                                    });
+                                }}
+                                style={{ flex: 2 }}
+                            >
+                                <option value="">-- Chọn món --</option>
+                                {products.map((p) => (
+                                    <option key={p.id || p._id} value={p.id || p._id}>
+                                        {p.name} — {p.price?.toLocaleString()} đ
+                                    </option>
+                                ))}
+                            </select>
+                            <input
+                                type="number"
+                                min="1"
+                                value={editTempItem.quantity}
+                                onChange={(e) =>
+                                    setEditTempItem({ ...editTempItem, quantity: e.target.value })
+                                }
+                                style={{ width: 70 }}
+                            />
+                            <input
+                                type="number"
+                                value={editTempItem.unitPrice}
+                                onChange={(e) =>
+                                    setEditTempItem({ ...editTempItem, unitPrice: e.target.value })
+                                }
+                                style={{ width: 100 }}
+                            />
+                            <button
+                                style={s.btn("#6d4c41")}
+                                onClick={() => {
+                                    if (!editTempItem.productId) return alert("⚠️ Chọn món!");
+                                    const p = products.find(
+                                        (x) => x.id === editTempItem.productId || x._id === editTempItem.productId
+                                    );
+                                    if (!p) return;
+                                    const exist = editItems.find(
+                                        (x) => x.productId === (p.id || p._id)
+                                    );
+                                    if (exist) exist.quantity += Number(editTempItem.quantity);
+                                    else
+                                        editItems.push({
+                                            productId: p.id || p._id,
+                                            productName: p.name,
+                                            quantity: Number(editTempItem.quantity),
+                                            unitPrice: Number(editTempItem.unitPrice || p.price),
+                                        });
+                                    setEditItems([...editItems]);
+                                    setEditTempItem({ productId: "", quantity: 1, unitPrice: 0 });
+                                }}
+                            >
+                                ➕ Thêm
+                            </button>
+                        </div>
+
+                        {/* Tổng & Lưu */}
+                        <p style={{ textAlign: "right", fontWeight: 700 }}>
+                            Tổng: {calcTotal(editItems).toLocaleString()} đ
+                        </p>
                         <div style={{ textAlign: "right" }}>
-                            <button style={s.btn("#8d6e63")} onClick={saveEditOrder}>💾 Lưu thay đổi</button>
+                            <button style={s.btn("#8d6e63")} onClick={saveEditOrder}>
+                                💾 Lưu thay đổi
+                            </button>
                         </div>
                     </div>
                 </div>
             )}
+
 
             {/* ===== MODAL THANH TOÁN ===== */}
             {showPayModal && paymentOrder && (
