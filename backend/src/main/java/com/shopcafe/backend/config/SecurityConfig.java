@@ -125,8 +125,6 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        // ✅ Cho phép truy cập ảnh từ thư mục uploads
-                        .requestMatchers("/uploads/**").permitAll()
 
                         // 🟢 Public routes
                         .requestMatchers(
