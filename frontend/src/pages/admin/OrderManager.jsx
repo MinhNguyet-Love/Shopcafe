@@ -1130,18 +1130,34 @@ export default function OrderManager() {
     const confirmPayment = async () => {
         const token = localStorage.getItem("token");
         try {
+            // 🧾 Cập nhật trạng thái đơn hàng sang "Đã thanh toán"
             await api.put(
-                `/orders/${paymentOrder.id || paymentOrder._id}/status?status=Đã thanh toán (${paymentMethod === "bank" ? "Chuyển khoản" : "Tiền mặt"})`,
+                `/orders/${paymentOrder.id || paymentOrder._id}/status?status=Đã thanh toán (${
+                    paymentMethod === "bank" ? "Chuyển khoản" : "Tiền mặt"
+                })`,
                 {},
                 { headers: { Authorization: `Bearer ${token}` } }
             );
+
             alert("✅ Thanh toán thành công!");
             setShowPayModal(false);
-            loadData();
+
+            // 🟢 Gọi lại danh sách đơn hàng và bàn để cập nhật UI
+            const [resOrders, resTables] = await Promise.all([
+                api.get("/orders"),
+                api.get("/tables"),
+            ]);
+
+            // 🟤 Cập nhật lại state
+            setOrders(resOrders.data || []);
+            setTables(resTables.data || []);
+
         } catch (e) {
             console.error("❌ Lỗi thanh toán:", e);
+            alert("⚠️ Có lỗi xảy ra khi thanh toán!");
         }
     };
+
 
     // ===== STYLE =====
     const s = {
@@ -1248,40 +1264,6 @@ export default function OrderManager() {
                 </div>
             )}
 
-            {/*/!* ===== MODAL SỬA ===== *!/*/}
-            {/*{showEditModal && editingOrder && (*/}
-            {/*    <div style={s.overlay}>*/}
-            {/*        <div style={s.modal}>*/}
-            {/*            <button onClick={() => setShowEditModal(false)} style={{ position: "absolute", right: 12, top: 8, background: "none", border: "none", fontSize: 20 }}>×</button>*/}
-            {/*            <h3>✏️ Sửa đơn — {getTableName(editingOrder.tableId)}</h3>*/}
-
-            {/*            <table style={{ width: "100%", marginBottom: 10 }}>*/}
-            {/*                <thead style={{ background: "#f1e3d6" }}>*/}
-            {/*                <tr><th>Món</th><th>SL</th><th>Đơn giá</th><th>Thành tiền</th></tr>*/}
-            {/*                </thead>*/}
-            {/*                <tbody>*/}
-            {/*                {editItems.map((it, i) => (*/}
-            {/*                    <tr key={i}>*/}
-            {/*                        <td style={s.td}>{it.productName}</td>*/}
-            {/*                        <td style={s.td}>*/}
-            {/*                            <input type="number" min="1" value={it.quantity} onChange={(e) => updateEditItem(i, "quantity", e.target.value)} style={{ width: 60 }} />*/}
-            {/*                        </td>*/}
-            {/*                        <td style={s.td}>*/}
-            {/*                            <input type="number" value={it.unitPrice} onChange={(e) => updateEditItem(i, "unitPrice", e.target.value)} style={{ width: 100 }} />*/}
-            {/*                        </td>*/}
-            {/*                        <td style={s.td}>{(it.quantity * it.unitPrice).toLocaleString()} đ</td>*/}
-            {/*                    </tr>*/}
-            {/*                ))}*/}
-            {/*                </tbody>*/}
-            {/*            </table>*/}
-
-            {/*            <p style={{ textAlign: "right", fontWeight: 700 }}>Tổng: {calcTotal(editItems).toLocaleString()} đ</p>*/}
-            {/*            <div style={{ textAlign: "right" }}>*/}
-            {/*                <button style={s.btn("#8d6e63")} onClick={saveEditOrder}>💾 Lưu thay đổi</button>*/}
-            {/*            </div>*/}
-            {/*        </div>*/}
-            {/*    </div>*/}
-            {/*)}*/}
 
             {/* ===== MODAL SỬA ===== */}
             {showEditModal && editingOrder && (

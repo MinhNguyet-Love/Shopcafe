@@ -163,7 +163,8 @@ public class OrderService {
             orderRepo.save(order);
 
             // ✅ Nếu thanh toán xong → bàn trở lại "TRỐNG"
-            if ("Đã thanh toán".equalsIgnoreCase(status)) {
+            if (status != null && status.toLowerCase().contains("đã thanh toán")) {
+
                 Table table = tableRepo.findById(order.getTableId())
                         .orElseThrow(() -> new RuntimeException("Không tìm thấy bàn!"));
                 table.setStatus("TRỐNG");
