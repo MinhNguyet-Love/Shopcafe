@@ -150,9 +150,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/tables/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/tables/**").hasRole("ADMIN")
 
-                        .requestMatchers(HttpMethod.POST, "/api/orders/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/orders/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/orders/**").hasRole("ADMIN")
+
 
                         // 🟠 Default
                         .anyRequest().authenticated()
