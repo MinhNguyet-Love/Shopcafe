@@ -8,11 +8,7 @@ import java.security.Key;
 import java.util.Date;
 import java.util.Map;
 
-/**
- * ✅ Dịch vụ tạo và xác thực JWT (JSON Web Token)
- * - Thêm quyền (role) vào token
- * - Token có thời hạn 24h
- */
+
 @Service
 public class JwtService {
 
