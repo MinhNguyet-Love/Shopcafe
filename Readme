@@ -1,0 +1,38 @@
+# ☕ ShopCafe – Web Quản Lý Quán Cafe (React + Spring Boot + Docker)
+
+## 🧩 Giới thiệu
+**ShopCafe** là ứng dụng quản lý quán cafe full-stack được xây dựng bằng:
+- **Frontend:** React + Vite + TailwindCSS (deploy qua Nginx)
+- **Backend:** Spring Boot + MongoDB Atlas
+- **Triển khai:** Docker Compose (chạy đồng thời backend & frontend)
+
+Ứng dụng hỗ trợ:
+- ✅ Đăng ký / đăng nhập (JWT)
+- ✅ Quản lý bàn, sản phẩm, đơn hàng
+- ✅ Thanh toán (tiền mặt hoặc QR MBBank)
+- ✅ Upload & lưu trữ hình ảnh sản phẩm
+- ✅ Giao diện quản trị (Admin) và người dùng
+
+---
+
+## ⚙️ Công nghệ sử dụng
+| Thành phần | Công nghệ |
+|-------------|------------|
+| Frontend | React + Vite + TailwindCSS + Axios |
+| Backend | Spring Boot 3 + Java 21 |
+| Database | MongoDB Atlas (Cloud) |
+| Reverse Proxy | Nginx |
+| DevOps | Docker, Docker Compose |
+| CI/CD (Tùy chọn) | GitHub Actions + Docker Hub + AWS EC2 |
+
+---
+Lệnh chạy # 1. Xây dựng image
+          docker compose build
+
+          # 2. Chạy container
+          docker compose up -d
+lên đóng docker compose down
+
+cd ..
+cd frontend
+npm run dev
